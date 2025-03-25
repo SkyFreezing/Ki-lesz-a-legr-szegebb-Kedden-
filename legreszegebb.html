@@ -1,174 +1,91 @@
-<!DOCTYPE html>
-<html lang="hu">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Ki lesz a legrészeged Kedden?</title>
-  <style>
-    body {
-      background: linear-gradient(-45deg, #1e1e2f, #282a36, #3f51b5, #9c27b0);
-      background-size: 400% 400%;
-      animation: gradient 15s ease infinite;
-      color: #fff;
-      font-family: 'Segoe UI', sans-serif;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: flex-start;
-      min-height: 100vh;
-      padding: 2em;
-      text-align: center;
-      margin: 0;
+<script>
+  const nevek = [
+    "MazoB", "Stim", "Dart", "Pukkanto", "Sunyi",
+    "SzürkeRókaFarkas", "Sky", "GyőriSex", "Vito", "Thomzon"
+  ];
+
+  let szavazatok = {};
+
+  const beszolasokAlap = [
+    "Biztos?",
+    "Nem inkább Bé?",
+    "Szerintem tévedsz!",
+    "B -t nem ismered?"
+  ];
+
+  // 🔁 Szavazatok betöltése indításkor
+  function betoltSzavazatok() {
+    const mentett = localStorage.getItem("szavazatok");
+    if (mentett) {
+      szavazatok = JSON.parse(mentett);
+    } else {
+      nevek.forEach(n => szavazatok[n] = 0);
+    }
+  }
+
+  // 💾 Mentés böngészőbe
+  function mentSzavazatok() {
+    localStorage.setItem("szavazatok", JSON.stringify(szavazatok));
+  }
+
+  function valasztottNev() {
+    const nev = document.getElementById("valaszto").value;
+    const output = document.getElementById("output");
+    const beszolasok = document.getElementById("beszolasok");
+    const extra = document.getElementById("extra");
+    const taps = document.getElementById("taps");
+    const gomb = document.getElementById("szavazGomb");
+
+    output.textContent = "";
+    beszolasok.textContent = "";
+    extra.textContent = "";
+    gomb.style.display = nev ? "inline-block" : "none";
+
+    if (!nev) return;
+
+    output.textContent = nev;
+
+    if (nev === "MazoB") {
+      taps.currentTime = 0;
+      taps.play();
+      confetti({ particleCount: 200, spread: 100, origin: { y: 0.6 } });
+    } else {
+      beszolasok.innerHTML = beszolasokAlap.map(uzenet => `<div>${uzenet}</div>`).join("");
     }
 
-    @keyframes gradient {
-      0% {background-position: 0% 50%;}
-      50% {background-position: 100% 50%;}
-      100% {background-position: 0% 50%;}
+    if (nev === "Thomzon") {
+      extra.textContent = "Ő volt fideszes, vigyázz vele!";
     }
 
-    h1 {
-      font-size: 2.5em;
-      margin-bottom: 1em;
+    if (nev === "Stim") {
+      extra.innerHTML = `
+        <div>Lehetséges, de nem ő a helyes válasz.</div>
+        <div>Ő már nem iszik annyit.</div>
+      `;
     }
 
-    select, button {
-      font-size: 1.2em;
-      padding: 0.6em 1.2em;
-      border-radius: 10px;
-      border: none;
-      margin: 1em;
-      cursor: pointer;
-    }
+    frissitsSzavazatok();
+  }
 
-    select {
-      background: #fff;
-      color: #000;
-    }
-
-    button {
-      background: #ffcc00;
-      color: #000;
-    }
-
-    #output {
-      font-size: 2em;
-      color: #00eaff;
-      margin-top: 1em;
-    }
-
-    #beszolasok, #extra, #szavazatok {
-      margin-top: 1em;
-      font-size: 1.1em;
-      color: #ffaaaa;
-    }
-
-    #szavazatok {
-      color: #aaffaa;
-      margin-top: 2em;
-      font-weight: bold;
-    }
-  </style>
-</head>
-<body>
-
-  <h1>Ki lesz a legrészeged Kedden?</h1>
-
-  <select id="valaszto" onchange="valasztottNev()">
-    <option value="">-- Válassz valakit --</option>
-    <option value="MazoB">MazoB</option>
-    <option value="Stim">Stim</option>
-    <option value="Dart">Dart</option>
-    <option value="Pukkanto">Pukkanto</option>
-    <option value="Sunyi">Sunyi</option>
-    <option value="SzürkeRókaFarkas">SzürkeRókaFarkas</option>
-    <option value="Sky">Sky</option>
-    <option value="GyőriSex">GyőriSex</option>
-    <option value="Vito">Vito</option>
-    <option value="Thomzon">Thomzon</option>
-  </select>
-
-  <div id="output"></div>
-  <div id="beszolasok"></div>
-  <div id="extra"></div>
-  <button id="szavazGomb" style="display:none;" onclick="szavaz()">Rá szavazok</button>
-  <div id="szavazatok"></div>
-
-  <audio id="taps" src="taps.mp3" preload="auto"></audio>
-  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
-
-  <script>
-    const nevek = [
-      "MazoB", "Stim", "Dart", "Pukkanto", "Sunyi",
-      "SzürkeRókaFarkas", "Sky", "GyőriSex", "Vito", "Thomzon"
-    ];
-
-    const szavazatok = {};
-    nevek.forEach(n => szavazatok[n] = 0);
-
-    const beszolasokAlap = [
-      "Biztos?",
-      "Nem inkább Bé?",
-      "Szerintem tévedsz!",
-      "B -t nem ismered?"
-    ];
-
-    function valasztottNev() {
-      const nev = document.getElementById("valaszto").value;
-      const output = document.getElementById("output");
-      const beszolasok = document.getElementById("beszolasok");
-      const extra = document.getElementById("extra");
-      const taps = document.getElementById("taps");
-      const gomb = document.getElementById("szavazGomb");
-
-      output.textContent = "";
-      beszolasok.textContent = "";
-      extra.textContent = "";
-      gomb.style.display = nev ? "inline-block" : "none";
-
-      if (!nev) return;
-
-      output.textContent = nev;
-
-      if (nev === "MazoB") {
-        taps.currentTime = 0;
-        taps.play();
-        confetti({ particleCount: 200, spread: 100, origin: { y: 0.6 } });
-      } else {
-        beszolasok.innerHTML = beszolasokAlap.map(uzenet => `<div>${uzenet}</div>`).join("");
-      }
-
-      if (nev === "Thomzon") {
-        extra.textContent = "Ő volt fideszes, vigyázz vele!";
-      }
-
-      if (nev === "Stim") {
-        extra.innerHTML = `
-          <div>Lehetséges, de nem ő a helyes válasz.</div>
-          <div>Ő már nem iszik annyit.</div>
-        `;
-      }
-
+  function szavaz() {
+    const nev = document.getElementById("valaszto").value;
+    if (nev) {
+      szavazatok[nev]++;
+      mentSzavazatok();
       frissitsSzavazatok();
     }
+  }
 
-    function szavaz() {
-      const nev = document.getElementById("valaszto").value;
-      if (nev) {
-        szavazatok[nev]++;
-        frissitsSzavazatok();
-      }
+  function frissitsSzavazatok() {
+    const div = document.getElementById("szavazatok");
+    let tartalom = "<h3>Szavazatok állása:</h3>";
+    for (const [nev, szam] of Object.entries(szavazatok)) {
+      tartalom += `<div>${nev}: ${szam} szavazat</div>`;
     }
+    div.innerHTML = tartalom;
+  }
 
-    function frissitsSzavazatok() {
-      const div = document.getElementById("szavazatok");
-      let tartalom = "<h3>Szavazatok állása:</h3>";
-      for (const [nev, szam] of Object.entries(szavazatok)) {
-        tartalom += `<div>${nev}: ${szam} szavazat</div>`;
-      }
-      div.innerHTML = tartalom;
-    }
-  </script>
-
-</body>
-</html>
+  // 🚀 Indításkor betöltés
+  betoltSzavazatok();
+  frissitsSzavazatok();
+</script>
