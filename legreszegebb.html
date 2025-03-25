@@ -14,8 +14,9 @@
       display: flex;
       flex-direction: column;
       align-items: center;
-      justify-content: center;
-      height: 100vh;
+      justify-content: flex-start;
+      min-height: 100vh;
+      padding: 2em;
       text-align: center;
       margin: 0;
     }
@@ -31,25 +32,41 @@
       margin-bottom: 1em;
     }
 
-    select {
+    select, button {
       font-size: 1.2em;
-      padding: 0.5em 1em;
-      border-radius: 8px;
+      padding: 0.6em 1.2em;
+      border-radius: 10px;
       border: none;
-      margin-bottom: 1em;
+      margin: 1em;
       cursor: pointer;
+    }
+
+    select {
+      background: #fff;
+      color: #000;
+    }
+
+    button {
+      background: #ffcc00;
+      color: #000;
     }
 
     #output {
       font-size: 2em;
-      margin-top: 1em;
       color: #00eaff;
+      margin-top: 1em;
     }
 
-    #extra {
+    #beszolasok, #extra, #szavazatok {
       margin-top: 1em;
-      font-size: 1.2em;
-      color: #ff6666;
+      font-size: 1.1em;
+      color: #ffaaaa;
+    }
+
+    #szavazatok {
+      color: #aaffaa;
+      margin-top: 2em;
+      font-weight: bold;
     }
   </style>
 </head>
@@ -72,16 +89,24 @@
   </select>
 
   <div id="output"></div>
+  <div id="beszolasok"></div>
   <div id="extra"></div>
+  <button id="szavazGomb" style="display:none;" onclick="szavaz()">Rá szavazok</button>
+  <div id="szavazatok"></div>
 
-  <!-- Taps hang -->
   <audio id="taps" src="taps.mp3" preload="auto"></audio>
-
-  <!-- Confetti könyvtár -->
   <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
 
   <script>
-    const alapBeszolasok = [
+    const nevek = [
+      "MazoB", "Stim", "Dart", "Pukkanto", "Sunyi",
+      "SzürkeRókaFarkas", "Sky", "GyőriSex", "Vito", "Thomzon"
+    ];
+
+    const szavazatok = {};
+    nevek.forEach(n => szavazatok[n] = 0);
+
+    const beszolasokAlap = [
       "Biztos?",
       "Nem inkább Bé?",
       "Szerintem tévedsz!",
@@ -89,50 +114,59 @@
     ];
 
     function valasztottNev() {
-      const valaszto = document.getElementById("valaszto");
-      const kivalasztott = valaszto.value;
+      const nev = document.getElementById("valaszto").value;
       const output = document.getElementById("output");
+      const beszolasok = document.getElementById("beszolasok");
       const extra = document.getElementById("extra");
       const taps = document.getElementById("taps");
+      const gomb = document.getElementById("szavazGomb");
 
       output.textContent = "";
+      beszolasok.textContent = "";
       extra.textContent = "";
+      gomb.style.display = nev ? "inline-block" : "none";
 
-      if (!kivalasztott) return;
+      if (!nev) return;
 
-      // Mindenkinél alap beszólások
-      alapBeszolasok.forEach((uzenet, index) => {
-        setTimeout(() => alert(uzenet), index * 400);
-      });
+      output.textContent = nev;
 
-      // Kiírás
-      setTimeout(() => {
-        output.textContent = kivalasztott;
+      if (nev === "MazoB") {
+        taps.currentTime = 0;
+        taps.play();
+        confetti({ particleCount: 200, spread: 100, origin: { y: 0.6 } });
+      } else {
+        beszolasok.innerHTML = beszolasokAlap.map(uzenet => `<div>${uzenet}</div>`).join("");
+      }
 
-        // Extra beszólások
-        if (kivalasztott === "Thomzon") {
-          extra.textContent = "Ő volt fideszes, vigyázz vele!";
-        }
+      if (nev === "Thomzon") {
+        extra.textContent = "Ő volt fideszes, vigyázz vele!";
+      }
 
-        if (kivalasztott === "Stim") {
-          extra.innerHTML = `
-            <div>Lehetséges, de nem ő a helyes válasz.</div>
-            <div>Ő már nem iszik annyit.</div>
-          `;
-        }
+      if (nev === "Stim") {
+        extra.innerHTML = `
+          <div>Lehetséges, de nem ő a helyes válasz.</div>
+          <div>Ő már nem iszik annyit.</div>
+        `;
+      }
 
-        if (kivalasztott === "MazoB") {
-          taps.currentTime = 0;
-          taps.play();
+      frissitsSzavazatok();
+    }
 
-          confetti({
-            particleCount: 200,
-            spread: 100,
-            origin: { y: 0.6 }
-          });
-        }
+    function szavaz() {
+      const nev = document.getElementById("valaszto").value;
+      if (nev) {
+        szavazatok[nev]++;
+        frissitsSzavazatok();
+      }
+    }
 
-      }, alapBeszolasok.length * 400 + 200); // Várunk, míg popupok lepörögnek
+    function frissitsSzavazatok() {
+      const div = document.getElementById("szavazatok");
+      let tartalom = "<h3>Szavazatok állása:</h3>";
+      for (const [nev, szam] of Object.entries(szavazatok)) {
+        tartalom += `<div>${nev}: ${szam} szavazat</div>`;
+      }
+      div.innerHTML = tartalom;
     }
   </script>
 
