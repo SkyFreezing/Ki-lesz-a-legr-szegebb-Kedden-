@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Ki lesz a legrészeged Kedden?</title>
+  <style>
+    body {
+      background: linear-gradient(-45deg, #1e1e2f, #282a36, #3f51b5, #9c27b0);
+      background-size: 400% 400%;
+      animation: gradient 15s ease infinite;
+      color: #fff;
+      font-family: 'Segoe UI', sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      text-align: center;
+      margin: 0;
+    }
+
+    @keyframes gradient {
+      0% {background-position: 0% 50%;}
+      50% {background-position: 100% 50%;}
+      100% {background-position: 0% 50%;}
+    }
+
+    h1 {
+      font-size: 2.5em;
+      margin-bottom: 1em;
+    }
+
+    select {
+      font-size: 1.2em;
+      padding: 0.5em 1em;
+      border-radius: 8px;
+      border: none;
+      margin-bottom: 1em;
+      cursor: pointer;
+    }
+
+    #output {
+      font-size: 2em;
+      margin-top: 1em;
+      color: #00eaff;
+    }
+
+    #extra {
+      margin-top: 1em;
+      font-size: 1.2em;
+      color: #ff6666;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Ki lesz a legrészeged Kedden?</h1>
+
+  <select id="valaszto" onchange="valasztottNev()">
+    <option value="">-- Válassz valakit --</option>
+    <option value="MazoB">MazoB</option>
+    <option value="Stim">Stim</option>
+    <option value="Dart">Dart</option>
+    <option value="Pukkanto">Pukkanto</option>
+    <option value="Sunyi">Sunyi</option>
+    <option value="SzürkeRókaFarkas">SzürkeRókaFarkas</option>
+    <option value="Sky">Sky</option>
+    <option value="GyőriSex">GyőriSex</option>
+    <option value="Vito">Vito</option>
+    <option value="Thomzon">Thomzon</option>
+  </select>
+
+  <div id="output"></div>
+  <div id="extra"></div>
+
+  <!-- Taps hang -->
+  <audio id="taps" src="taps.mp3" preload="auto"></audio>
+
+  <!-- Confetti könyvtár -->
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
+  <script>
+    const alapBeszolasok = [
+      "Biztos?",
+      "Nem inkább Bé?",
+      "Szerintem tévedsz!",
+      "B -t nem ismered?"
+    ];
+
+    function valasztottNev() {
+      const valaszto = document.getElementById("valaszto");
+      const kivalasztott = valaszto.value;
+      const output = document.getElementById("output");
+      const extra = document.getElementById("extra");
+      const taps = document.getElementById("taps");
+
+      output.textContent = "";
+      extra.textContent = "";
+
+      if (!kivalasztott) return;
+
+      // Mindenkinél alap beszólások
+      alapBeszolasok.forEach((uzenet, index) => {
+        setTimeout(() => alert(uzenet), index * 400);
+      });
+
+      // Kiírás
+      setTimeout(() => {
+        output.textContent = kivalasztott;
+
+        // Extra beszólások
+        if (kivalasztott === "Thomzon") {
+          extra.textContent = "Ő volt fideszes, vigyázz vele!";
+        }
+
+        if (kivalasztott === "Stim") {
+          extra.innerHTML = `
+            <div>Lehetséges, de nem ő a helyes válasz.</div>
+            <div>Ő már nem iszik annyit.</div>
+          `;
+        }
+
+        if (kivalasztott === "MazoB") {
+          taps.currentTime = 0;
+          taps.play();
+
+          confetti({
+            particleCount: 200,
+            spread: 100,
+            origin: { y: 0.6 }
+          });
+        }
+
+      }, alapBeszolasok.length * 400 + 200); // Várunk, míg popupok lepörögnek
+    }
+  </script>
+
+</body>
+</html>
